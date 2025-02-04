@@ -3,15 +3,17 @@ import UploadButton from "./upload-button";
 import { CldImage } from 'next-cloudinary';
 import { CloudinaryImage } from './cloudinary-image';
 
-type searchResult ={
+export type searchResult ={
   public_id:string
+  tags:string[]
 }
 
 export default async function GalleryPage() {
   const results = await cloudinary.v2.search
   .expression('resource_type:image')
   .sort_by('created_at','desc')
-  .max_results(10)
+  .with_field('tags')
+  .max_results(30)
   .execute() as {resources:searchResult[]};
 
   return (
@@ -24,8 +26,9 @@ export default async function GalleryPage() {
 <div className='grid grid-cols-4 gap-4'>
       {results.resources.map((result)=>(
         <CloudinaryImage
+        path='/gallery'
         key={result.public_id}
-        src={result.public_id}
+        imagedata={result}
         width="400"
         height="300"
         alt="Description of an image"
